@@ -16,25 +16,30 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
-      - name: Setup Java JDK 17
-        uses: actions/setup-java@v4
+      - name: Setup Java JDK 21
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
 
       - name: Prepare Web Assets
         run: |
           mkdir -p www
-          if [ -f "index.html" ]; then cp index.html www/; fi
-          if [ -f "SoCanMit.html" ]; then cp SoCanMit.html www/index.html; fi
-          if [ -f "so_can_mit_pro_db.html" ]; then cp so_can_mit_pro_db.html www/index.html; fi
+          HTML_FILE=$(find . -maxdepth 2 -name "*.html" ! -path "./www/*" | head -n 1)
+          if [ -n "$HTML_FILE" ]; then
+            cp "$HTML_FILE" www/index.html
+            echo "Da sao chep $HTML_FILE thanh www/index.html"
+          else
+            echo "Khong tim thay file .html nao trong kho!"
+            exit 1
+          fi
 
       - name: Initialize Capacitor Android Project
         run: |
           npm init -y
-          npm install @capacitor/core @capacitor/cli @capacitor/android
+          npm install @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6
           npx cap init "So Can Mit Pro" "vn.io.linhkienpinthapmuoi.socanmit" --web-dir=www
           npx cap add android
           npx cap sync android
